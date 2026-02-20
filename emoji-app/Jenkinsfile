@@ -1,23 +1,70 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "ci-test-app"
+        CONTAINER_NAME = "ci-test-container"
+        PORT = "4646"
+        APP_PORT = "3000"
+        REPO_URL = "git@github.com:KULLANICI_ADI/REPO_ADI.git"
+        BRANCH = "main"
+    }
+
     stages {
-        stage('Clone') {
+
+        stage('Clean Workspace') {
             steps {
-                git 'https://github.com/KULLANICI_ADI/REPO_ADI.git'
+                deleteDir()
+            }
+        }
+
+        stage('Clone Repository') {
+            steps {
+                git branch: "${BRANCH}",
+                    url: "${REPO_URL}"
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t ci-test .'
+                sh """
+                docker build -t ${IMAGE_NAME}:latest .
+                """
             }
         }
 
-        stage('Run Container') {
+        stage('Stop & Remove Old Container') {
             steps {
-                sh 'docker run -d -p 4646:3000 ci-test'
+                sh """
+                docker rm -f ${CONTAINER_NAME} || true
+                """
             }
+        }
+
+        stage('Run New Container') {
+            steps {
+                sh """
+                docker run -d \
+                -p ${PORT}:${APP_PORT} \
+                --name ${CONTAINER_NAME} \
+                ${IMAGE_NAME}:latest
+                """
+            }
+        }
+
+        stage('Show Running Containers') {
+            steps {
+                sh "docker ps"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Deployment başarılı!"
+        }
+        failure {
+            echo "❌ Pipeline hata verdi!"
         }
     }
 }
