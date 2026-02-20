@@ -1,4 +1,4 @@
-const express = require("express");
+console.log("CI/CD çalıştı");yconst express = require("express");
 const app = express();
 
 app.get("/", (req, res) => {
