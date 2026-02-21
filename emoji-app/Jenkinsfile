@@ -6,7 +6,7 @@ pipeline {
         CONTAINER_NAME = "ci-test-container"
         PORT = "4646"
         APP_PORT = "3000"
-        REPO_URL = "git@github.com:KULLANICI_ADI/REPO_ADI.git"
+        REPO_URL = "git@github.com:elcinaltnz/elc.git"
         BRANCH = "main"
     }
 
