@@ -1,4 +1,4 @@
-console.log("CI/CD çalıştı");yconst express = require("express");
+console.log("Jenkins Otomatik Canlı Yayın Başarılı! 🚀");yconst express = require("express");
 const app = express();
 
 app.get("/", (req, res) => {
