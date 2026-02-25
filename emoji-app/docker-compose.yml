@@ -1,12 +1,9 @@
-
-
-
-
-version: "3.8"
+version: '3.8'
 
 services:
-  frontend:
-    build: .
+  emoji-app:
+    image: emoji-app:latest
+    container_name: emoji-app-container
     ports:
-      - "4646:4646"
-    container_name: emoji-frontend
+      - "4646:4646"  # Sol taraf: Senin bilgisayarın, Sağ taraf: Konteynerin içi
+    restart: always
