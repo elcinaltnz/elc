@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "ci-test-app"
-        CONTAINER_NAME = "ci-test-container"
-        PORT = "4646"
-        APP_PORT = "3000"
+        IMAGE_NAME = "emoji-app" // docker-compose.yml ile aynı olsun
+        CONTAINER_NAME = "emoji-app-container"
+        PORT = "4646"       // Dış port
+        APP_PORT = "4646"   // server.js içindeki port (3000'i 4646 yaptık)
         REPO_URL = "git@github.com:elcinaltnz/elc.git"
         BRANCH = "main"
     }
