@@ -2,49 +2,46 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "emoji-app" // docker-compose.yml ile aynı olsun
+        // Imaj ve Konteyner isimlerini projenle uyumlu hale getirdik
+        IMAGE_NAME = "emoji-app"
         CONTAINER_NAME = "emoji-app-container"
-        PORT = "4646"       // Dış port
-        APP_PORT = "4646"   // server.js içindeki port (3000'i 4646 yaptık)
-        REPO_URL = "git@github.com:elcinaltnz/elc.git"
-        BRANCH = "main"
+        // server.js içindeki portun 4646 olduğu için her iki tarafı da eşitledik
+        PORT = "4646"       // Dışarıdan erişilecek port
+        APP_PORT = "4646"   // Konteyner içindeki port
     }
 
     stages {
-
-        stage('Clean Workspace') {
+        stage('Prepare & Clean') {
             steps {
+                // Workspace temizliği yapıyoruz
                 deleteDir()
-            }
-        }
-
-        stage('Clone Repository') {
-            steps {
-                git branch: "${BRANCH}",
-                    url: "${REPO_URL}"
+                // Jenkins arayüzünde tanımladığın SCM ayarlarını kullanarak kodu çekiyoruz
+                checkout scm
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh """
-                docker build -t ${IMAGE_NAME}:latest .
-                """
+                // Kodlar emoji-app klasöründe olduğu için o dizine girip build alıyoruz
+                dir('emoji-app') {
+                    sh "docker build -t ${IMAGE_NAME}:latest ."
+                }
             }
         }
 
         stage('Stop & Remove Old Container') {
             steps {
-                sh """
-                docker rm -f ${CONTAINER_NAME} || true
-                """
+                // Eğer konteyner zaten çalışıyorsa hata vermeden kaldırır
+                sh "docker rm -f ${CONTAINER_NAME} || true"
             }
         }
 
         stage('Run New Container') {
             steps {
+                // Restart always ekledik ve portları eşitledik
                 sh """
                 docker run -d \
+                --restart always \
                 -p ${PORT}:${APP_PORT} \
                 --name ${CONTAINER_NAME} \
                 ${IMAGE_NAME}:latest
@@ -52,19 +49,20 @@ pipeline {
             }
         }
 
-        stage('Show Running Containers') {
+        stage('Health Check') {
             steps {
-                sh "docker ps"
+                // Konteynerin durumunu konsola yazdırır
+                sh "docker ps -f name=${CONTAINER_NAME}"
             }
         }
     }
 
     post {
         success {
-            echo "✅ Deployment başarılı!"
+            echo "✅ Tebrikler Elçin! Uygulama http://localhost:4646 adresinde yayında."
         }
         failure {
-            echo "❌ Pipeline hata verdi!"
+            echo "❌ Pipeline hata verdi! Lütfen Jenkins konsol çıktılarını incele."
         }
     }
 }
